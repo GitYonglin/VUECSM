@@ -29,7 +29,6 @@ li {
   font-family: 'Microsoft YaHei', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   position: relative;
 }
 
@@ -43,4 +42,15 @@ li {
 .fade-leave-active {
   opacity: 0;
 }
+
+td {
+  .el-input-number {
+    width: auto;
+  }
+  img {
+    width: 50px;
+    height: 50px;
+  }
+}
+
 </style>

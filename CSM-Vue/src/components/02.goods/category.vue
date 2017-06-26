@@ -9,7 +9,7 @@ export default {
   name: 'foodCategory',
   data() {
     return {
-      msg: '菜谱分类'
+      msg: '商品分类'
     }
   }
 }

@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\peach\\.nuget\\packages",
+      "C:\\Users\\peach\\.dotnet\\NuGetFallbackFolder"
+    ]
+  }
+}

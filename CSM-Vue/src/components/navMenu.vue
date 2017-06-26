@@ -2,14 +2,11 @@
   <div>
     <div class="nav-left">
       <nav class="left">
-        <div class="logo">
-          <img src="../assets/logo.png">
+        <div class="logo" >
+          <img src="../assets/logo.png" @click="routePush('/')">
         </div>
         <ul>
-          <li :class=" $route.matched[0].path==item.url ? 'active' : '' " 
-              v-for="item in $store.state.navMenu.one" 
-              :key="item.url"
-              @click="routePush(item.path)">
+          <li :class=" $route.matched[0].path==item.url ? 'active' : '' " v-for="item in $store.state.navMenu.one" :key="item.url" @click="routePush(item.path)">
             <i class="el-icon-edit"></i>
             {{item.name}}
           </li>
@@ -20,11 +17,7 @@
           <span>{{$store.state.navMenu.title}}</span>
         </div>
         <ul>
-          <li :class=" $route.matched[1].path== item.url ? 'active' : '' " 
-              v-for="item in $store.state.navMenu.two" 
-              :key="item.path"
-              v-if="!item.heddin"
-              @click="routePush(item.url)">
+          <li :class=" $route.matched[1].path== item.url ? 'active' : '' " v-for="item in $store.state.navMenu.two" :key="item.path" v-if="!item.heddin" @click="routePush(item.url)">
             {{item.name}}
           </li>
         </ul>
@@ -34,12 +27,12 @@
       <nav v-if="$store.state.navMenu.two">
         <ul>
           <!--<li class="active" v-for="item in 5" :key="item">
-            概览
-          </li>-->
+              概览
+            </li>-->
           <li>{{$store.state.navMenu.threeTitle}}</li>
         </ul>
       </nav>
-      <div class="content">
+      <div class="content" :style="{ margin: $store.state.navMenu.two ? '10px' : '0'}">
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -66,7 +59,6 @@ export default {
 <style lang="scss" scoped>
 .content {
   background-color: #fff;
-  margin: 10px;
   padding: 15px;
   min-width: 750px;
   min-height: 500px;
@@ -120,6 +112,10 @@ nav {
     text-align: start;
     li {
       padding-left: 15px;
+      &:hover{
+        color: #333;
+        background: #F8F8F8;
+      }
     }
   }
   .left2 {
@@ -139,6 +135,9 @@ nav {
     }
     li {
       padding: 0 5px;
+      &:hover{
+        color: #38f;
+      }
     }
   }
 }
@@ -162,7 +161,7 @@ nav {
     line-height: 48px;
     background-color: #fff;
   }
-  li.active{
+  li.active {
     border-bottom: 2px solid #38F
   }
 }

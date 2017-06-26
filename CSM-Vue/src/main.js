@@ -8,6 +8,8 @@ import router from './router'
 import Vuex from 'vuex'
 import store from './store/store'
 
+import Axios from 'axios'
+
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-default/index.css'
 
@@ -16,9 +18,7 @@ Vue.use(ElementUI)
 
 Vue.config.productionTip = false
 
-// import Axios from 'axios'
-// Vue.use(Axios)
-// Vue.prototype.$axios = Axios
+Vue.prototype.$axios = Axios
 
 /* eslint-disable no-new */
 new Vue({

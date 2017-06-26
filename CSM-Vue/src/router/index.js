@@ -11,11 +11,10 @@ import FoodsCategory from '../components/01.foods/category.vue'
 import FoodsEdit from '../components/01.foods/edit.vue'
 
 import Goods from '../components/02.goods/goods.vue'
+import GoodsCategory from '../components/02.goods/category.vue'
 import GoodsCookbook from '../components/02.goods/cookbook/cookbook.vue'
-import GoodsCookbookCategory from '../components/02.goods/cookbook/category.vue'
 import GoodsCookbookEdit from '../components/02.goods/cookbook/edit.vue'
 import Goodspack from '../components/02.goods/pack/pack.vue'
-import GoodspackCategory from '../components/02.goods/pack/category.vue'
 import GoodspackEdit from '../components/02.goods/pack/edit.vue'
 
 import Order from '../components/03.order/order.vue'
@@ -56,11 +55,10 @@ const routes = [
     component: NavMenu,
     children: [
       { path: '', component: Goods, name: '商品概览', url: '/goods/' },
+      { path: 'category', component: GoodsCategory, name: '商品分类', url: '/goods/category' },
       { path: 'cookbook', component: GoodsCookbook, name: '菜谱概览', url: '/goods/cookbook' },
-      { path: 'cookbook/category', component: GoodsCookbookCategory, name: '菜谱分类', url: '/goods/cookbook/category' },
       { path: 'cookbook/edit', component: GoodsCookbookEdit, name: '菜谱编辑', heddin: true },
       { path: 'pack', component: Goodspack, name: '套餐概览', url: '/goods/pack' },
-      { path: 'pack/category', component: GoodspackCategory, name: '套餐分类', url: '/goods/pack/category' },
       { path: 'pack/edit', component: GoodspackEdit, name: '套餐编辑', heddin: true }
     ]
   }, {
