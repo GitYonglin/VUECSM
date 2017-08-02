@@ -1,45 +1,113 @@
 <template>
-  <div>
-    <div class="opeartion">
+  <div v-loading.body="listLoading">
+    <div class="opeartion" >
       <div style="float:left;">
-        <el-button size="small" type="primary" @click="routePush('/foods/edit')">添加食材</el-button>
+        <el-button size="small" type="primary" @click="routePush('/foods/edit', null)">添加食材</el-button>
+        <el-button size="small" type="primary" @click="postTest">跨域测试</el-button>
       </div>
-      <div style="float:right;">
-        <el-select size="small" v-model="value8" filterable placeholder="请选择">
-          <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-          </el-option>
-        </el-select>
+      <div class="right">
+        <div>
+          <el-select size="small" v-model="value8" filterable placeholder="请选择">
+            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+        </div>
+        <div>
+          <el-input size="small" placeholder="请输入内容"> </el-input>
+        </div>
+        <div>
+          <el-button type="primary" size="small" icon="search">搜索</el-button>
+        </div>
       </div>
     </div>
     <div>
-      <el-table :data="tableData5" v-loading.body="listLoading" style="width: 100%" ref="multipleTable">
+      <el-table :data="showData"  style="width: 100%" ref="multipleTable">
         <el-table-column label="图片" width="86">
           <template scope="scope">
-            <img :src="scope.row.imgUrl" alt="没有图片">
+            <img :src="scope.row.pictureText | imgV" alt="没有图片">
           </template>
         </el-table-column>
-        <el-table-column label="ID" prop="id" ></el-table-column>
-        <el-table-column label="名称" prop="name"></el-table-column>
-        <el-table-column label="价格" width="100">
+        <el-table-column label="ID" prop="id"></el-table-column>
+        <el-table-column label="名称">
           <template scope="scope">
-            <el-input-number v-show="scope.row.edit" v-model="scope.row.price" :controls="false"></el-input-number>
-            <span v-show="!scope.row.edit">{{scope.row.price}}</span>
+            <el-tooltip class="item" effect="dark" content="点击编辑该食材" placement="right">
+              <div @click="routePush('/foods/edit', scope.row.id)" style="cursor: pointer;"> {{scope.row.name}} </div>
+            </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column inline-template label="库存" width="100">
-          <el-input-number v-model="row.number" :controls="false"></el-input-number>
-        </el-table-column>
-        <el-table-column inline-template label="上架" width="80">
-          <el-checkbox v-model="row.shelves" :controls="false"></el-checkbox>
-        </el-table-column>
-        <el-table-column inline-template label="销量">
-          <el-tag type="success">{{row.sales}}</el-tag>
-        </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="剂量" prop="dose"></el-table-column>
+        <el-table-column label="价格" min-width="150">
           <template scope="scope">
-            <el-button v-show='!scope.row.edit' type="primary" @click='cc(scope.row),scope.row.edit=true' size="small" icon="edit">编辑</el-button>
-            <el-button v-show='scope.row.edit' type="success" @click='scope.row.edit=false' size="small" icon="check">完成</el-button>
-            <el-button size="small" icon="delete"></el-button>
+            <el-input size="small" v-if="scope.row.edit" v-model="rowEdits[scope.row.id].unitPrice" type="number" @change="$refs.modify.rowModify(scope.row)">
+              <template slot="prepend">￥</template>
+            </el-input>
+            <el-tooltip class="item" effect="dark" content="双击修改" placement="right">
+              <span @dblclick="$refs.modify.edit(scope.row)" v-show="!scope.row.edit">
+                <i class="price mark-i">￥ </i>{{scope.row.unitPrice}}
+              </span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="库存" min-width="150">
+          <template scope="scope">
+            <el-input size="small" v-if="scope.row.edit" v-model="rowEdits[scope.row.id].inventory" type="number" @change="$refs.modify.rowModify(scope.row)">
+              <template slot="append">g</template>
+            </el-input>
+            <el-tooltip class="item" effect="dark" content="双击修改" placement="right">
+              <span @dblclick="$refs.modify.edit(scope.row)" v-show="!scope.row.edit">{{scope.row.inventory}}
+                <i class="mark-i g"> g</i>
+              </span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="进货日期" min-width="200">
+          <template scope="scope">
+            <el-date-picker 
+              @change="rowEdits[scope.row.id].purchaseDate = $event, $refs.modify.rowModify(scope.row)"
+              size="small" 
+              v-if="scope.row.edit" 
+              v-model="rowEdits[scope.row.id].purchaseDate" 
+              type="date" 
+              :picker-options="$store.state.dateRules.purchaseDate" 
+              >
+            </el-date-picker>
+            <el-tooltip class="item" effect="dark" content="双击修改" placement="right">
+              <span @dblclick="$refs.modify.edit(scope.row)" v-show="!scope.row.edit">{{scope.row.purchaseDate}} </span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="保质期" min-width="200">
+          <template scope="scope">
+            <el-date-picker
+              size="small" 
+              v-if="scope.row.edit" 
+              v-model="rowEdits[scope.row.id].hedgeDate" 
+              type="date" 
+              disabledDate :picker-options="$store.state.dateRules.hedgeDate" 
+              @change="rowEdits[scope.row.id].hedgeDate = $event, $refs.modify.rowModify(scope.row)"
+              >
+            </el-date-picker>
+            <el-tooltip class="item" effect="dark" content="双击修改" placement="right">
+              <span @dblclick="$refs.modify.edit(scope.row)" v-show="!scope.row.edit">{{scope.row.hedgeDate}} </span>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column label="上架" width="100">
+          <template scope="scope">
+            <div @click.stop="$refs.modify.editCk(scope.row)">
+              <i v-show='!scope.row.edit' class="el-icon-circle-check" style="font-size:20px;" :style="{ color: scope.row.shelves ? '#13CE66' : '#cacaca'}"></i>
+              <i v-if='scope.row.edit' class="el-icon-circle-check" style="font-size:20px;" :style="{ color: rowEdits[scope.row.id].shelves ? '#13CE66' : '#cacaca'}"></i>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="描述" prop="desc"></el-table-column>
+        <el-table-column label="最小购买数量" prop="minNumber"></el-table-column>
+        <el-table-column label="最小购买量" prop="minAmount"></el-table-column>
+        <el-table-column label="最大购买量" prop="maxAmount"></el-table-column>
+        <el-table-column label="修改日期" prop="modifyDate"></el-table-column>
+  
+        <el-table-column label="操作" width="180" fixed="right">
+          <template scope="scope">
+            <min-modify :row.sync="scope.row" :rowEdits.sync="rowEdits" :rowEdit="rowEdit" ref="modify" @editSave="editSave" @del="del"></min-modify>
           </template>
         </el-table-column>
       </el-table>
@@ -48,8 +116,11 @@
 </template>
 
 <script>
+// import qs from 'qs'
+import MinModify from '../00.common/minModify.vue'
 export default {
   name: 'foodCategory',
+  components: {MinModify},
   data() {
     return {
       msg: '食材概览',
@@ -70,8 +141,17 @@ export default {
         label: '北京烤鸭'
       }],
       value8: '',
-      tableData5: null,
-      listLoading: false
+      showData: [],
+      listLoading: true,
+      editState: false,
+      rowEdit: {
+        unitPrice: '',
+        inventory: '',
+        shelves: false,
+        purchaseDate: '',
+        hedgeDate: ''
+      },
+      rowEdits: {}
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -81,29 +161,96 @@ export default {
     // 不！能！获取组件实例 `this`
     // 因为当钩子执行前，组件实例还没被创建
   },
-  methods: {
-    routePush(url) {
-      this.$router.push(url)
-    },
-    cc(row) {
-      row.edit = true
-      console.log(this.tableData5)
-    }
+  // 挂载前获取数据
+  beforeMount() {
+    this.getFoodData()
   },
-  created() {
-    this.$axios({
-      method: 'get',
-      url: 'http://192.168.31.119/Home/tabdata'
-    }).then(response => {
-      this.tableData5 = response.data.map(v => {
-        v.edit = false
-        return v
+  beforeUpdate() {
+    console.log('1111111')
+    // this.listLoading = true
+  },
+  updated() {
+    console.log('2222222')
+  },
+  methods: {
+    getFoodData() {
+      this.listLoading = true
+      this.$axios({
+        method: 'get',
+        url: 'http://localhost:3000/food'
+      }).then(response => {
+        console.log(response.data)
+        this.showData = response.data
+        this.listLoading = false
       })
-      console.log(response.status)
-      console.log(response.statusText)
-      console.log(response.headers)
-      console.log(response.config)
-    })
+    },
+    // 跳转到编辑页面
+    routePush(url, row) {
+      console.log(row)
+      this.$router.push({ name: '食材编辑', params: { id: row } })
+    },
+    editSave(row) {
+      console.log('2222222222')
+      // 获取修改日期
+      this.rowEdits[row.id]['modifyDate'] = new Date().toLocaleString()
+      this.$axios({
+        method: 'patch',
+        url: `http://localhost:3000/food/${row.id}`,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: this.rowEdits[row.id]
+      }).then(response => {
+        this.getFoodData()
+        this.$notify({
+          title: '成功',
+          message: '数据保存成功!',
+          type: 'success'
+        })
+      })
+      row.edit = false
+      this.editState = false
+    },
+    // 删除数据
+    del(id) {
+      this.$confirm('此操作将永久删除该分类, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$axios({
+          method: 'delete',
+          url: `http://localhost:3000/food/${id}`
+        }).then(response => {
+          this.getFoodData()
+          this.$notify({
+            title: '成功',
+            message: '删除成功!',
+            type: 'success'
+          })
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 跨域测试
+    postTest() {
+      this.$axios({
+        method: 'get',
+        url: 'http://localhost:65284/Home/tabdata',
+        withCredentials: true
+      }).then(sss => {
+        console.log(sss.data)
+        // console.log(sss.status)
+        // console.log(sss.statusText)
+        // console.log(sss.headers)
+        // console.log(sss.config)
+        console.log('OK222222222')
+      })
+    }
   }
 }
 </script>
@@ -112,5 +259,12 @@ export default {
 .opeartion {
   margin-bottom: 15px;
   overflow: hidden;
+  .right {
+    float: right;
+    div {
+      float: left;
+      margin-right: 10px;
+    }
+  }
 }
 </style>

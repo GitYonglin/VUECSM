@@ -4,8 +4,8 @@ E:\CSM\NETCore\CMS\CMS\bin\Debug\netcoreapp1.1\CMS.runtimeconfig.dev.json
 E:\CSM\NETCore\CMS\CMS\bin\Debug\netcoreapp1.1\CMS.dll
 E:\CSM\NETCore\CMS\CMS\bin\Debug\netcoreapp1.1\CMS.pdb
 E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.csprojResolveAssemblyReference.cache
+E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.Properties.Resources.resources
+E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.csproj.GenerateResource.Cache
 E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.AssemblyInfo.cs
 E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.dll
 E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.pdb
-E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.Properties.Resources.resources
-E:\CSM\NETCore\CMS\CMS\obj\Debug\netcoreapp1.1\CMS.csproj.GenerateResource.Cache

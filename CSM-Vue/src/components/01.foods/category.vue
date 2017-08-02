@@ -2,7 +2,7 @@
   <div>
     <div class="opeartion">
       <div style="float:left;">
-        <el-button size="small" type="primary" @click="FEditCategory('添加分类')">添加分类</el-button>
+        <el-button size="small" type="primary" @click="FAddCategory('添加分类')">添加分类</el-button>
       </div>
       <div style="float:right;">
         <el-select size="small" v-model="value8" filterable placeholder="请选择">
@@ -12,18 +12,20 @@
       </div>
     </div>
     <div>
-      <el-table :data="tableData5" style="width: 100%" ref="multipleTable">
+      <el-table :data="categoryData" style="width: 100%" ref="multipleTable">
         <el-table-column label="图片" inline-template width="86">
           <template>
             <img :src="row.imgUrl" alt="没有图片">
           </template>
         </el-table-column>
-        <el-table-column label="ID" prop="id" ></el-table-column>
+        <el-table-column label="ID" prop="id"></el-table-column>
         <el-table-column label="名称" prop="name"></el-table-column>
+        <el-table-column label="创建日期" prop="createDate"></el-table-column>
+        <el-table-column label="修改日期" prop="modifyDate"></el-table-column>
         <el-table-column label="操作">
           <template scope="scope">
-            <el-button size="small" icon="edit"></el-button>
-            <el-button size="small" icon="delete"></el-button>
+            <el-button size="small" icon="edit" @click="FEditCategory('修改分类', scope.row)" ></el-button>
+            <el-button size="small" icon="delete" @click="del(scope.row.id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -39,7 +41,7 @@
         </el-form-item>
         <el-form-item label="图片" prop="imgUrl" :label-width="formLabelWidth">
           <div class="divImgage el-card">
-            <img :src="category.imgUrl" >
+            <img :src="category.imgUrl">
   
             <div class="file">
               选择图片
@@ -50,14 +52,16 @@
   
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="resetForm('category')">取 消</el-button>
-        <el-button type="primary" @click="submit()">确 定</el-button>
+        <el-button @click="resetForm()">重　置</el-button>
+        <el-button @click="cancel()">取 消</el-button>
+        <el-button type="primary" @click="submit">保存</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
+// import qs from 'qs'
 export default {
   name: 'foodCategory',
   data() {
@@ -80,44 +84,23 @@ export default {
         label: '北京烤鸭'
       }],
       value8: '',
-      tableData5: [],
-      tab5: [{
-        id: '1',
-        name: '好滋好味鸡蛋仔',
-        imgUrl: 'http://element.eleme.io/static/hamburger.50e4091.png',
-        price: 99,
-        number: 999,
-        shelves: true,
-        sales: 9999
-      }, {
-        id: '2',
-        name: '好滋好味鸡蛋仔',
-        imgUrl: 'http://element.eleme.io/static/hamburger.50e4091.png',
-        price: 99,
-        number: 999,
-        shelves: true,
-        sales: 9999
-      }, {
-        id: '3',
-        name: '好滋好味鸡蛋仔',
-        imgUrl: 'http://element.eleme.io/static/hamburger.50e4091.png',
-        price: 99,
-        number: 999,
-        shelves: true,
-        sales: 9999
-      }, {
-        id: '4',
-        name: '好滋好味鸡蛋仔',
-        imgUrl: 'http://element.eleme.io/static/hamburger.50e4091.png',
-        price: 99,
-        number: 999,
-        shelves: true,
-        sales: 9999
-      }],
-      category: {
+      categoryData: [],
+      categorySwitch: false,
+      categoryBase: {
+        id: null,
         name: '',
         imgFile: null,
-        imgUrl: ''
+        imgUrl: 'https://cn.vuejs.org/images/logo.png',
+        createDate: null,
+        modifyDate: ''
+      },
+      category: {
+        id: null,
+        name: '',
+        imgFile: null,
+        imgUrl: 'https://cn.vuejs.org/images/logo.png',
+        createDate: null,
+        modifyDate: ''
       },
       formLabelWidth: '120px',
       editCategory: false,
@@ -125,21 +108,95 @@ export default {
     }
   },
   methods: {
-    routePush(url) {
-      this.$router.push(url)
+    // 获取食材分类数据
+    getCatagoryData() {
+      this.$axios({
+        method: 'get',
+        url: 'http://localhost:3000/foodCategory'
+      }).then(response => {
+        console.log(response.data)
+        this.categoryData = response.data
+      })
     },
-    FEditCategory(title) {
+    // 编辑分类
+    FEditCategory(title, data) {
+      if (data) {
+        // this.category = data
+        Object.assign(this.category, data)
+      }
+      this.editCategoryTitle = title
+      this.editCategory = true
+    },
+    // 添加分类
+    FAddCategory(title) {
+      Object.assign(this.category, this.categoryBase)
       this.editCategoryTitle = title
       this.editCategory = true
     },
     // 添加修改提交数据
     submit() {
-      console.log('Ok')
+      let m = 'patch'
+      let url = `http://localhost:3000/foodCategory/${this.category.id}`
+      let msg = '食材分类修改成功'
+      if (!this.category.id) {
+        m = 'post'
+        url = 'http://localhost:3000/foodCategory'
+        msg = '食材分类添加成功'
+        this.category.createDate = new Date().toLocaleString()
+      }
+      // 获取当前时间
+      this.category.modifyDate = new Date().toLocaleString()
+      console.log('category====', this.category)
+      // let fromData = new FormData()
+      // for (var i in this.category) {
+      //   fromData.append(i, this.category[i])
+      // }
+
+      this.$axios({
+        method: m,
+        url: url,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: this.category
+      }).then(response => {
+        this.getCatagoryData()
+        this.cancel()
+        this.$message.success(msg)
+      })
     },
     // 重置数据
-    resetForm(formName) {
-      this.$refs[formName].resetFields()
+    resetForm() {
+      Object.assign(this.category, this.categoryBase)
+    },
+    // 取消
+    cancel () {
+      Object.assign(this.category, this.categoryBase)
       this.editCategory = false
+    },
+    // 删除数据
+    del(id) {
+      this.$confirm('此操作将永久删除该分类, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$axios({
+          method: 'delete',
+          url: `http://localhost:3000/foodCategory/${id}`
+        }).then(response => {
+          this.getCatagoryData()
+        })
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     },
     // 上传图片缩略图显示
     fileUP(e) {
@@ -150,9 +207,10 @@ export default {
       this.category.imgFile = file
     }
   },
+  // 挂载前获取数据
   beforeMount: function () {
     console.log('3-beforeMount 挂载之前')
-    this.tableData5 = this.tab5
+    this.getCatagoryData()
   }
 }
 </script>
@@ -161,47 +219,5 @@ export default {
 .opeartion {
   margin-bottom: 15px;
   overflow: hidden;
-}
-
-.divImgage {
-  width: 200px;
-  height: 250px;
-  float: left;
-  margin: 5px;
-  img {
-    width: 200px;
-    height: 200px;
-    display: block;
-  }
-}
-
-.file {
-  position: relative;
-  display: inline-block;
-  background: #dfe6ec;
-  top: 1px;
-  /*border: 1px solid #99D3F5;*/
-  border-radius: 4px;
-  /*padding: 4px 12px;*/
-  overflow: hidden;
-  color: #20a0ff;
-  text-decoration: none;
-  text-align: center;
-  line-height: 50px;
-  height: 50px;
-  width: 200px;
-  input {
-    position: absolute;
-    font-size: 100px;
-    right: 0;
-    top: 0;
-    opacity: 0;
-  }
-
-  &:hover {
-    background: #20a0ff;
-    color: #fff;
-    text-decoration: none;
-  }
 }
 </style>

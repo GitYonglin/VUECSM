@@ -1,98 +1,149 @@
 <!--'Content-Type': 'application/x-www-form-urlencoded'-->
-<!--'Content-Type': 'multipart/form-data'-->
+<!--'Content-Type': 'multipart/form-data' 包含文件请求-->
 <template>
   <div>
-    <el-form id="formData" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+    <h1>{{$route.query.id}}</h1>
+    <el-form :model="formData" :rules="rules" ref="formData" label-width="100px">
       <el-tabs v-model="activeName">
-        <el-tab-pane label="基本信息" name="a">
+         <el-tab-pane label="基本信息" name="a">
           <el-form-item label="食材名称" prop="name">
-            <el-input name="ruleForm.name" v-model="ruleForm.name"></el-input>
+            <el-input v-model="formData.name"></el-input>
           </el-form-item>
           <el-form-item label="食材描述" prop="desc">
-            <el-input name="ruleForm.desc" type="textarea" v-model="ruleForm.desc"></el-input>
+            <el-input name="formData.desc" type="textarea" v-model="formData.desc"></el-input>
           </el-form-item>
-          <el-form-item label="价格" prop="price">
-            <el-input name="ruleForm.price" type="price" v-model.number="ruleForm.price">
+          <el-form-item label="价格" prop="unitPrice">
+            <el-input type="price" v-model.number="formData.unitPrice" @blur="price2(formData.unitPrice)">
               <template slot="prepend">
                 ¥
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item label="是否上架">
-            <input type="text" name="ruleForm.shelves" v-model="ruleForm.shelves" hidden="hidden">
-            <el-switch v-model="ruleForm.shelves" on-text="YES" off-text="NO" @change="ccc" :width="60"> </el-switch>
-          </el-form-item>
           <el-form-item label="剂量" prop="dose">
-            <el-input name="ruleForm.dose" type="dose" v-model.number="ruleForm.dose">
+            <el-input v-model.number="formData.dose" min="0">
               <template slot="append">
                 g
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item label="最小剂量" prop="minDose">
-            <el-input name="ruleForm.minDose" type="minDose" v-model.number="ruleForm.minDose">
+          <el-form-item label="库存" prop="inventory">
+            <el-input v-model.number="formData.inventory" min="0">
               <template slot="append">
                 g
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item label="最大剂量" prop="maxDose">
-            <el-input name="ruleForm.maxDose" type="maxDose" v-model.number="ruleForm.maxDose">
+          <el-form-item label="最小购买数量" prop="minNumber">
+            <el-input v-model.number="formData.minNumber" min="0"> </el-input>
+          </el-form-item>
+          <el-form-item label="最小购买量" prop="minAmount" min="0">
+            <el-input v-model.number="formData.minAmount">
               <template slot="append">
                 g
               </template>
             </el-input>
+          </el-form-item>
+          <el-form-item label="最大购买量" prop="maxAmount">
+            <el-input v-model.number="formData.maxAmount" min="0">
+              <template slot="append">
+                g
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="是否上架">
+            <input type="text" name="formData.shelves" v-model="formData.shelves" hidden="hidden">
+            <el-switch v-model="formData.shelves" on-text="YES" off-text="NO" @change="formData.shelves = $event" :width="60"> </el-switch>
           </el-form-item>
           <el-form-item label="进货日期" required>
             <el-col :span="11">
               <el-form-item prop="purchaseDate">
-                <input type="text" name="ruleForm.purchaseDate" hidden="hidden" v-model="ruleForm.purchaseDate">
-                <el-date-picker @change="setDate($event)" type="date" placeholder="选择日期" v-model="ruleForm.purchaseDate" style="width: 100%;"></el-date-picker>
+                <el-date-picker 
+                  @change="formData.purchaseDate = $event" 
+                  type="date" 
+                  placeholder="选择日期" 
+                  v-model="formData.purchaseDate" 
+                  style="width: 100%;"
+                  :picker-options="$store.state.dateRules.purchaseDate"
+                  >
+                </el-date-picker>
+              </el-form-item>
+            </el-col>
+          </el-form-item>
+          <el-form-item label="保值日期" required>
+            <el-col :span="11">
+              <el-form-item prop="hedgeDate">
+                <el-date-picker 
+                  @change="formData.hedgeDate = $event" 
+                  type="date" 
+                  placeholder="选择日期" 
+                  v-model="formData.hedgeDate" 
+                  style="width: 100%;"
+                  :picker-options="$store.state.dateRules.hedgeDate"
+                  >
+                </el-date-picker>
               </el-form-item>
             </el-col>
           </el-form-item>
           <hr>
-          <el-form-item label="分类选择" prop="categorys">
-            <el-checkbox-group v-model="ruleForm.categorys">
-              <el-checkbox :label="category[0]" name="ruleForm.categorys" :key="category[0]">主料</el-checkbox>
-              <el-checkbox :label="category[1]" name="ruleForm.categorys" :key="category[1]">辅料</el-checkbox>
-              <el-checkbox :label="category[2]" name="ruleForm.categorys" :key="category[2]">酱料</el-checkbox>
+          <el-form-item label="食材分类选择" prop="foodCategory">
+            <el-checkbox-group v-model="formData.foodCategory">
+              <el-checkbox v-for="(item, index) in foodCategory" :label="item.id" :key="item.id">{{item.name}}</el-checkbox>
             </el-checkbox-group>
           </el-form-item>
-        </el-tab-pane>
-        <el-tab-pane label="图文描述" name="b">
-          <div v-for="(item, index) in ruleForm.imgs" :key="item.id">
-            <div class="el-dialog__headerbtn" @click="ruleForm.imgs.splice(index,1)">
-              <i class="el-dialog__close el-icon el-icon-close"></i>
-            </div>
-            <h2>{{index}}</h2>
-            <el-form-item label="Url">
-              <el-input :name="'imgs[' +index + '].url'" v-model="item.url"></el-input>
-            </el-form-item>
-            <!--<el-form-item label="Url" prop="imgFile">
-                              <el-input type="imgFile" :name="'imgFiles[' +index + '].url'" v-model="item.url"></el-input>
-                          </el-form-item>-->
-            <el-form-item label="标题">
-              <el-input :name="'imgs[' +index + '].title'" v-model="item.title"></el-input>
-            </el-form-item>
-            <el-form-item label="描述">
-              <el-input :name="'imgs[' +index + '].desc'" type="textarea" v-model="item.desc"></el-input>
-            </el-form-item>
-            <el-form-item label="图片">
-              <img :src="item.url" style="width:80px;height:80px;" >
-              <input type="file" :name="'imgs[' +index + '].file'" @change="fileUP($event,item)" >
-            </el-form-item>
-            <!--<el-input :name="'imgFiles[' +index + '].file'" type="file" @change="console.log($event)"></el-input>-->
-            <hr >
-          </div>
-          <el-button type="primary" @click="addImgs"> + 添加</el-button>
-        </el-tab-pane>
-        <el-tab-pane label="角色管理" name="c">角色管理</el-tab-pane>
+          <el-form-item label="商品分类选择">
+            <goods-category-select :goodsCategorySelectData="formData.goodsCategory" :foo.sync="syncgoodsCategory"></goods-category-select>
+          </el-form-item>
+        </el-tab-pane> 
+         <el-tab-pane label="图文描述" name="b">
+          <el-button type="primary" @click="addpictureText" size="small">添加</el-button>
+          <picture-text :pictureText.sync="formData.pictureText"></picture-text>
+        </el-tab-pane> 
+         <el-tab-pane label="生产资料" name="c">
+          <el-form-item label="名称">
+             <el-input v-model="formData.manufacturerInformation.name"></el-input> 
+          </el-form-item>
+          <el-form-item label="地址">
+             <el-input v-model="formData.manufacturerInformation.address"></el-input> 
+          </el-form-item>
+          <el-form-item label="联系方式">
+             <el-input v-model="formData.manufacturerInformation.contactInformation"></el-input> 
+          </el-form-item>
+          <el-form-item label="生产日期" required>
+            <el-col :span="11">
+              <el-form-item prop="">
+                <el-date-picker 
+                  @change="formData.manufacturerInformation.productionDate = $event" 
+                  type="date" 
+                  placeholder="选择日期" 
+                  v-model="formData.manufacturerInformation.productionDate" 
+                  style="width: 100%;"
+                  :picker-options="$store.state.dateRules.purchaseDate"
+                  >
+                </el-date-picker>  
+              </el-form-item>
+            </el-col>
+          </el-form-item>
+          <el-form-item label="收获日期" required>
+            <el-col :span="11">
+              <el-form-item prop="purchaseDate">
+                <el-date-picker 
+                  @change="formData.manufacturerInformation.harvestDate = $event" 
+                  type="date" 
+                  placeholder="选择日期" 
+                  v-model="formData.manufacturerInformation.harvestDate" 
+                  style="width: 100%;"
+                  :picker-options="$store.state.dateRules.purchaseDate"
+                  >
+                </el-date-picker> 
+              </el-form-item>
+            </el-col>
+          </el-form-item>
+        </el-tab-pane> 
         <el-tab-pane label="定时任务补偿" name="d">定时任务补偿</el-tab-pane>
       </el-tabs>
       <el-form-item>
-        <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
-        <el-button @click="resetForm('ruleForm')">重置</el-button>
+        <el-button type="primary" @click="submitForm()">{{subTitle}}</el-button>
+        <el-button @click="resetForm()">重置</el-button>
         <el-button @click="kv">测试</el-button>
       </el-form-item>
     </el-form>
@@ -101,54 +152,56 @@
 <script>
 // import $ from 'jquery';
 // import axios from 'axios';
-// import qs from 'qs';
+// import qs from 'qs'
+import { mapState } from 'vuex'
+import GoodsCategorySelect from '../00.common/goodsCategorySelect'
+import PictureText from '../00.common/pictureText'
 
 export default {
   data() {
     return {
+      subTitle: '创建保存',
+      syncgoodsCategory: null,
+      goodsSelectData: null,
       activeName: 'a',
-      category: [1, 2, 3],
-      ruleForm: {
-        id: 'ID',
-        name: '名称',
-        price: 9.99,
-        desc: '描述',
-        shelves: false,
-        dose: 500,
-        minDose: 100,
-        maxDose: 10000,
-        purchaseDate: '',
-        imgs: [],
-        categorys: []
-      },
+      formData: {},
+      formDataBase: {},
       rules: {
         name: [
           { required: true, message: '请输入食材名称', trigger: 'blur' },
-          { min: 2, max: 20, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          { min: 2, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
         ],
         desc: [
           { required: true, message: '请填食材描述', trigger: 'blur' }
         ],
-        price: [
+        unitPrice: [
           { required: true, message: '价格不能为空' },
-          { type: 'float', message: '价格必须为数字值' }
+          { pattern: /^\d/, message: '价格应该是正数' }
         ],
         dose: [
           { required: true, message: '剂量不能为空' },
           { type: 'number', message: '剂量必须为数字值' }
         ],
-        minDose: [
-          { required: true, message: '最小剂量不能为空' },
-          { type: 'number', message: '最小剂量必须为数字值' }
+        inventory: [
+          { required: true, message: '库存不能为空' },
+          { type: 'number', message: '库存必须为数字值' }
         ],
-        maxDose: [
-          { required: true, message: '最大剂量不能为空' },
-          { type: 'number', message: '最大剂量必须为数字值' }
+        minNumber: [
+          { required: true, message: '最小购买数量不能为空' },
+          { type: 'number', message: '最小购买数量必须为数字值' }
+        ],
+        minAmount: [
+          { required: true, message: '最小购买量不能为空' },
+          { type: 'number', message: '最小购买量必须为数字值' }
+        ],
+        maxAmount: [
+          { required: true, message: '最大购买量不能为空' },
+          { type: 'number', message: '最大购买量必须为数字值' }
         ],
         imgFile: [
           { required: true, message: '上传图片不能为空', trigger: 'blur' }
         ],
-        categorys: [
+        foodCategory: [
           { type: 'array', required: true, message: '请至少选择一个分类', trigger: 'change' }
         ],
         purchaseDate: [
@@ -157,126 +210,127 @@ export default {
       }
     }
   },
-  methods: {
-    kv() {
-      let tt = this.ruleForm
-      for (let i in tt) {
-        console.log(i, '---', tt[i], '---', typeof tt[i])
-      };
-      for (let i in tt.categorys) {
-        console.log(i, '---', tt.categorys[i], '---', typeof tt.categorys[i])
-      };
-      tt.imgs.forEach(item => {
-        for (var i in item) {
-          console.log(i, '---', item[i], '---', typeof item[i])
-          console.log(`i, '---', ${item[i]}, '---', ${typeof item[i]}`)
-        };
-      })
-      console.log(...tt)
-    },
-    submitForm(formName) {
-      let formData = new FormData(document.getElementById('formData'))
-      // 获取form对象内容 赋值给FormData对象
-      // let formData = new FormData($('#formData')[0]);
-
-      // let ll = qs.stringify({ 'bar': 123 });
-      let tt = this.ruleForm
-      let fd = new FormData()
-
-      for (var i in tt) {
-        console.log(i, '---', tt[i], '---', typeof tt[i])
-        if (typeof tt[i] !== 'object') {
-          fd.append('food.' + i, tt[i])
-        }
-      };
-      tt.categorys.forEach((value, index) => {
-        console.log(`food.categorys[${index}]`, '----', value)
-        fd.append(`food.categorys[${index}].id`, value)
-      })
-      tt.imgs.forEach((item, index) => {
-        for (var i in item) {
-          console.log(i, '---', item[i], '---', typeof item[i])
-          fd.append(`food.imgs[${index}].${i}`, item[i])
-        };
-      })
-
-      // fd.append('data', tt);
-
-      console.log(fd)
-      console.log(formData)
-
+  components: {
+    GoodsCategorySelect, PictureText
+  },
+  watch: {
+    formData() {
+      console.log('1123456789')
+    }
+  },
+  // 挂载前获取数据
+  beforeMount() {
+    console.log('3-beforeMount 挂载之前')
+    this.formData = this.$unity.copyObj(this.$store.state.base.foodBase)
+    // 获取食材分类数据
+    if (!this.foodCategory) {
+      this.$store.dispatch('foodCategoryData')
+    }
+    // 检测新增或编辑
+    if (this.$route.params.id) {
+      this.subTitle = '修改保存'
       this.$axios({
-        method: 'post',
-        url: '/food/edit',
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        data: fd
+        method: 'get',
+        url: `http://localhost:3000/food?id=${this.$route.params.id}`
       }).then(response => {
-        console.log(response.data)
-        console.log(response.status)
-        console.log(response.statusText)
-        console.log(response.headers)
-        console.log(response.config)
+        this.formDataBase = response.data[0]
+        this.resetForm()
       })
-      // axios({
-      //    method: 'post',
-      //    url: '/sfood/edit',
-      //    headers: {
-      //        'Content-Type': 'application/x-www-form-urlencoded'
-      //    },
-      //    data: { 'bar': 123 }
-      // }).then(response => {
-      //    console.log(response.data);
-      //    console.log(response.status);
-      //    console.log(response.statusText);
-      //    console.log(response.headers);
-      //    console.log(response.config);
-      // });
-      // $.ajax({
-      //    type: "POST",
-      //    url: '/sfood/edit',
-      //    data: formData,
-      //    cache: false,
-      //    contentType: false,
-      //    processData: false,
-      //    success: function (message) {
-      //        console.log(message);
-      //        //then.$router.push({ name: 'food', params: { index: then.$route.params.index } });
-      //    },
-      //    error: function () {
-      //        alert("There was error uploading files!");
-      //    }
-      // });
+    } else {
+      this.formDataBase = this.$unity.copyObj(this.$store.state.base.foodBase)
+    }
+  },
+  // 计算属性
+  computed: {
+    ...mapState({
+      goodsCategoryDataX: 'goodsCategoryData',
+      foodCategory: 'foodCategoryData'
+    })
+  },
+  methods: {
+    // 测试fromdata转换数据
+    kv() {
+      // 表单验证方法
+      this.$refs.formData.validate((result) => {
+        if (result) {
+          // 验证通过,调用module里的setUserInfo方法
+          // this.$store.dispatch('setUserInfo')
+          alert('表达验证合法')
+        } else {
+          alert('表达验证不合法')
+        }
+      })
     },
-    resetForm(formName) {
-      this.$refs[formName].resetFields()
+    // 数据提交到后台
+    submitForm() {
+      // 商品分类添加处理
+      this.formData.goodsCategory = this.syncgoodsCategory
+      let m = 'patch'
+      let url = `http://localhost:3000/food/${this.formData.id}`
+      let msg = '食材修改成功'
+      if (!this.formData.id) {
+        m = 'post'
+        url = 'http://localhost:3000/food'
+        msg = '食材添加成功'
+        // 获取创建日期
+        this.formData.createDate = new Date().toLocaleString()
+      }
+      // 获取修改日期
+      this.formData.modifyDate = new Date().toLocaleString()
+
+      // 表单验证方法
+      this.$refs.formData.validate((result) => {
+        if (result) {
+          // 验证通过,调用module里的setUserInfo方法
+          this.$axios({
+            method: m,
+            url: url,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            data: this.formData
+          }).then(response => {
+            this.$router.push('/foods')
+            // this.$message.success(msg)
+            this.$notify({
+              title: '成功',
+              message: msg,
+              type: 'success'
+            })
+          }).catch(function(err) {
+            this.$message.error(err)
+          })
+        } else {
+          this.$message.error('表单填写有误!请检测表单!')
+        }
+      })
+    },
+    // 重置数据
+    resetForm() {
+      this.formData = this.$unity.copyObj(this.formDataBase)
+      console.log(this.formData)
     },
     // 添加一组图文描述
-    addImgs() {
-      this.ruleForm.imgs.push({
-        url: '',
-        title: '',
+    addpictureText() {
+      this.formData.pictureText.push({
+        imgUrl: '',
         desc: '',
-        file: null
+        imgFile: null
       })
     },
-    // 上传图片缩略图显示
-    fileUP(e, item) {
-      // 获取图片文件
-      var file = e.target.files[0]
-      // 设置<img>src路径
-      item.url = window.URL.createObjectURL(file)
-      item.file = file
-    },
-    setDate(Date) {
-      console.log(Date)
-      this.ruleForm.purchaseDate = Date
-    },
-    ccc(event) {
-      this.ruleForm.shelves = event
-      console.log(event)
+    // 价格小数处理
+    price2(data) {
+      if (data) {
+        console.log(data.toFixed(2))
+        this.formData.unitPrice = data.toFixed(2)
+      }
     }
+  },
+  beforeRouteLeave(to, from, next) {
+    // 导航离开该组件的对应路由时调用
+    // 可以访问组件实例 `this`
+    console.log('离开')
+    next()
   }
 }
 </script>

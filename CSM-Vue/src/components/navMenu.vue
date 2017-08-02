@@ -2,7 +2,7 @@
   <div>
     <div class="nav-left">
       <nav class="left">
-        <div class="logo" >
+        <div class="logo">
           <img src="../assets/logo.png" @click="routePush('/')">
         </div>
         <ul>
@@ -27,8 +27,8 @@
       <nav v-if="$store.state.navMenu.two">
         <ul>
           <!--<li class="active" v-for="item in 5" :key="item">
-              概览
-            </li>-->
+                    概览
+                  </li>-->
           <li>{{$store.state.navMenu.threeTitle}}</li>
         </ul>
       </nav>
@@ -64,11 +64,6 @@ export default {
   min-height: 500px;
 }
 
-li.active {
-  color: #333;
-  background: #F8F8F8;
-}
-
 nav {
   margin: 0;
   padding: 0;
@@ -88,6 +83,10 @@ nav {
 }
 
 .nav-left {
+  li.active {
+    color: #333;
+    background: #F8F8F8;
+  }
   .logo {
     display: block;
     width: 90px;
@@ -104,6 +103,7 @@ nav {
     position: fixed;
     top: 0px;
     bottom: 0;
+    z-index: 9;
   }
   .left {
     left: 0;
@@ -112,9 +112,9 @@ nav {
     text-align: start;
     li {
       padding-left: 15px;
-      &:hover{
-        color: #333;
-        background: #F8F8F8;
+      &:hover {
+        color: #fff;
+        background: #666;
       }
     }
   }
@@ -124,6 +124,7 @@ nav {
     background: #fff;
     color: #666;
     text-align: center;
+    border-right: 1px solid #CACACA;
     .title {
       font-size: 14px;
       height: 50px;
@@ -135,7 +136,7 @@ nav {
     }
     li {
       padding: 0 5px;
-      &:hover{
+      &:hover {
         color: #38f;
       }
     }

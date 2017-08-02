@@ -4,12 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CMS.Controllers
 {
-    
     public class HomeController : Controller
     {
+        [EnableCors("MyDomain")]
         public IActionResult Index()
         {
             return View();
@@ -29,11 +30,18 @@ namespace CMS.Controllers
             return View();
         }
 
+        [Authorize]
+        public IActionResult AuthPage()
+        {
+            return View();
+        }
+
         public IActionResult Error()
         {
             return View();
         }
 
+        [Authorize]
         [EnableCors("MyDomain")]
         public IActionResult TabData()
         {
@@ -44,7 +52,7 @@ namespace CMS.Controllers
             };
             return Json(v);
         }
-
+        [EnableCors("MyDomain")]
         public IActionResult TabData2()
         {
             var v = new List<Tab> { new Tab{ Id = 1, Name = "好滋好味鸡蛋仔", ImgUrl = "http://element.eleme.io/static/hamburger.50e4091.png", Price = 99, Number = 999, Shelves = true, Sales = 9999 },

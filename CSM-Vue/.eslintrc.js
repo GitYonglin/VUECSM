@@ -1,4 +1,4 @@
-// http://eslint.org/docs/user-guide/configuring
+http://eslint.org/docs/user-guide/configuring
 
 module.exports = {
   root: true,
@@ -23,6 +23,8 @@ module.exports = {
     'generator-star-spacing': 0,
     // 函数定义时括号前面要不要有空格
     "space-before-function-paren": [0, "always"],
+    // 禁止出现未使用过的变量
+    "no-unused-vars": [0, { "vars": "all", "args": "none" }],
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0
   }
